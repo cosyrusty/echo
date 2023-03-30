@@ -15,7 +15,7 @@ fn main() {
     'a: for i in env::args().skip(1) {
         if !parsed_option && i.starts_with('-') {
             match &i[..] {
-                "-u" => no_newline = true,
+                "-n" => no_newline = true,
                 "-e" => escaped = true,
                 "-E" => escaped = false,
                 "--help" => {
@@ -26,11 +26,14 @@ fn main() {
                     version = true;
                     break 'a;
                 }
-                _ => {}
+                _ => {
+                    values.push(i);
+                    parsed_option = true;
+                }
             }
         } else {
             parsed_option = true;
-            values.push(i.clone())
+            values.push(i)
         }
     }
 
@@ -56,5 +59,5 @@ fn main() {
 }
 
 fn print_escaped(values: Vec<String>) {
-    print!("Hello Ecs")
+    print!("Ecs is not implimented yet!")
 }
