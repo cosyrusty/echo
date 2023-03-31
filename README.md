@@ -15,6 +15,7 @@ Display a line of text.
 
 ## following sequences are interpreted when option -e is set
 
+```
 \\      backslash
 \a      alert (BEL)
 \b      backspace
@@ -25,6 +26,7 @@ Display a line of text.
 \r      carriage return
 \t      horizontal tab
 \v      vertical tab
+```
 
 TODO
 
