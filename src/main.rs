@@ -47,7 +47,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         if escaped {
             let should_stop = print_escaped(input, &mut output)?;
             if should_stop {
-                break;
+                return Ok(());
             }
         } else {
             write!(output, "{input}")?;
@@ -61,6 +61,54 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn print_escaped(v: &str, writer: impl Write) -> io::Result<bool> {
-    Ok(true)
+// TODO: impl \x and \0 seq
+fn print_escaped(v: &str, mut writer: impl Write) -> io::Result<bool> {
+    let mut should_stop = false;
+
+    let mut iter = v.chars();
+    let mut buffer = ['\\'; 2];
+    // buffer = ['\', '\'] is important
+    // if there is a seq than, parse seq replace buf[1] = parsed char
+    // and print the 2nd element only or buf[1] only, hence start = 1.
+
+    // else not a seq than, replace buf[1] the same as it was in original str
+    // print the buffer from start, hence start = 0 and return 'next' itself when
+    // nothing matched
+
+    while let Some(mut c) = iter.next() {
+        let mut start = 1; // index, from where to print the buffer
+        if c == '\\' {
+            if let Some(next) = iter.next() {
+                c = match next {
+                    '\\' => '\\',
+                    'a' => '\x07',
+                    'b' => '\x08',
+                    'c' => {
+                        should_stop = true;
+                        break;
+                    }
+                    'e' => '\x1b',
+                    'f' => '\x0c',
+                    'n' => '\n',
+                    'r' => '\r',
+                    't' => '\t',
+                    'v' => '\x0b',
+                    'x' => todo!(), // parse hexcode seq
+                    '0' => todo!(), // parse octcal upto 2 digits
+                    _ => {
+                        start = 0;
+                        c
+                    }
+                }
+            }
+        }
+
+        buffer[1] = c;
+
+        for c in &buffer[start..] {
+            write!(writer, "{c}")?
+        }
+    }
+
+    Ok(should_stop)
 }
